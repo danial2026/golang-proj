@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/danial2026/file-sharing-go/domain"
+	"github.com/danial2026/golang-proj/domain"
 )
 
 var (

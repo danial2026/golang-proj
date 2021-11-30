@@ -1,7 +1,7 @@
 package app
 
 import (
-	controllers "github.com/danial2026/file-sharing-go/controllers/files"
+	controllers "github.com/danial2026/golang-proj/controllers/files"
 )
 
 func mapUrls() {
