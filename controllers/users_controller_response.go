@@ -5,17 +5,18 @@ import (
 	"net/http"
 	"time"
 )
-func (controller filesController) BadRequestResponse(c *gin.Context) {
 
-    FilesController.JsonResponse(c, http.StatusBadRequest, "Bad Request")
+func (controller usersController) BadRequestResponse(c *gin.Context) {
+
+    usersController.JsonResponse(c, http.StatusBadRequest, "Bad Request")
 }
 
-func (controller filesController) NotFoundResponse(c *gin.Context) {
+func (controller usersController) NotFoundResponse(c *gin.Context) {
 
-    FilesController.JsonResponse(c, http.StatusNotFound, "Not Found")
+    usersController.JsonResponse(c, http.StatusNotFound, "Not Found")
 }
 
-func (controller filesController) JsonResponse(c *gin.Context, http_status int, messege string) {
+func (controller usersController) JsonResponse(c *gin.Context, http_status int, messege string) {
 
     c.Header("Content-Type", "application/json")
 
