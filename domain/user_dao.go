@@ -1,50 +1,55 @@
 package domain
 
 import (
-	"errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (user *User) Save() error {
-	if user == nil {
-		return errors.New("invalid user to save")
-	}
-	stmt, err := dbClient.Prepare("INSERT INTO users(email) VALUES(?);")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	result, err := stmt.Exec(user.Email)
-	if err != nil {
-		return err
-	}
-
-	userId, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-	user.Id = userId
-	return nil
+	_, err := collection.InsertOne(ctx, user)
+	return err
 }
 
-func (user *User) Get() error {
-	stmt, err := dbClient.Prepare("SELECT id, email FROM users WHERE id=?;")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
+func (user *User) GetByEmail(email string) ([]*User, error) {
+	filter := bson.D{{"email", email}}
+	return filterUsers(filter)
+}
 
-	rows, err := stmt.Query(user.Id)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
+func (user *User) GetAllUsers() ([]*User, error) {
+	// passing bson.D{{}} matches all documents in the collection
+	filter := bson.D{{}}
+	return filterUsers(filter)
+}
 
-	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Email); err != nil {
-			return err
+func filterUsers(filter interface{}) ([]*User, error) {
+	// A slice of Users for storing the decoded documents
+	var users []*User
+
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		return users, err
+	}
+
+	for cur.Next(ctx) {
+		var t User
+		err := cur.Decode(&t)
+		if err != nil {
+			return users, err
 		}
-		return nil
+
+		users = append(users, &t)
 	}
-	return errors.New("user not found")
+
+	if err := cur.Err(); err != nil {
+		return users, err
+	}
+
+	// once exhausted, close the cursor
+	cur.Close(ctx)
+
+	if len(users) == 0 {
+		return users, mongo.ErrNoDocuments
+	}
+
+	return users, nil
 }

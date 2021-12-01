@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/danial2026/golang-proj/domain"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -10,17 +11,21 @@ var (
 
 type usersService struct{}
 
-func (service usersService) Get(id int64) (*domain.User, error) {
-	user := domain.User{Id: id}
-	if err := user.Get(); err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
 func (service usersService) Save(user *domain.User) error {
 	if err := user.Save(); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (service usersService) GetByEmail(email string) []*domain.User {
+	var user domain.User
+	users, err := user.GetByEmail(email)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil
+		}
+		return nil
+	}
+	return users
 }

@@ -2,19 +2,21 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/danial2026/golang-proj/domain"
+	"github.com/danial2026/golang-proj/services"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
 	UsersController = usersController{}
 )
 
-type UsersController struct{}
+type usersController struct{}
 
 func (controller usersController) StoreNewUser(c *gin.Context) {
-
 	value, ok := c.Request.URL.Query()["email"]
 	if !ok || len(value[0]) < 1 {
 		UsersController.BadRequestResponse(c)
@@ -23,12 +25,32 @@ func (controller usersController) StoreNewUser(c *gin.Context) {
 
 	c.Header("Content-Type", "application/json")
 
-	var newUser domain.User
+	newEmail := string(value[0])
 
-	newUser.Email = string(value[0])
+	users := services.UsersService.GetByEmail(newEmail)
+	
+	userResponse := &domain.User{}
+	statusCode := http.StatusOK
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": newUser,
+	if len(users) < 1 {
+		newUser := &domain.User{
+			ID:        primitive.NewObjectID(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Email:     newEmail,
+		}
+
+		services.UsersService.Save(newUser)
+
+		userResponse = newUser
+	} else {
+
+		userResponse = users[len(users)-1]
+		statusCode = http.StatusBadRequest
+	}
+
+	c.JSON(statusCode, gin.H{
+		"code":    statusCode,
+		"message": userResponse,
 	})
 }

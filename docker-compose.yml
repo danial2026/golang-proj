@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    volumes:
+      - ./mongo-init/:/docker-entrypoint-initdb.d/:ro
+    ports:
+      - 57017:27017
+      - 9229:9229

@@ -8,12 +8,12 @@ import (
 
 func (controller usersController) BadRequestResponse(c *gin.Context) {
 
-    usersController.JsonResponse(c, http.StatusBadRequest, "Bad Request")
+    UsersController.JsonResponse(c, http.StatusBadRequest, "Bad Request")
 }
 
 func (controller usersController) NotFoundResponse(c *gin.Context) {
 
-    usersController.JsonResponse(c, http.StatusNotFound, "Not Found")
+    UsersController.JsonResponse(c, http.StatusNotFound, "Not Found")
 }
 
 func (controller usersController) JsonResponse(c *gin.Context, http_status int, messege string) {

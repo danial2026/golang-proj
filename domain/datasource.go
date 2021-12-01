@@ -1,20 +1,26 @@
 package domain
 
 import (
-	"database/sql"
-	"fmt"
-    _ "github.com/go-sql-driver/mysql"
+	"context"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	dbClient *sql.DB
-)
+var collection *mongo.Collection
+var ctx = context.TODO()
 
 func init() {
-	var err error
-	dbClient, err = sql.Open("mysql", fmt.Sprintf("%s:%s@(%s)/%s",
-		"root", "root", "127.0.0.1:3306", "users_db"))
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:57017/")
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		panic(err)
 	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	collection = client.Database("subscription_db").Collection("users")
 }
