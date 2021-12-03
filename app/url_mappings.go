@@ -7,5 +7,5 @@ import (
 func mapUrls() {
 	prefix := "/api/v1"
 
-	router.GET(prefix+"/subscribe", controllers.UsersController.StoreNewUser)
+	router.GET(prefix+"/contact-me", controllers.UsersController.StoreNewUser)
 }
