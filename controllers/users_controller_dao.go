@@ -17,40 +17,52 @@ var (
 type usersController struct{}
 
 func (controller usersController) StoreNewUser(c *gin.Context) {
-	value, ok := c.Request.URL.Query()["email"]
-	if !ok || len(value[0]) < 1 {
+	valueEmail, ok := c.Request.URL.Query()["email"]
+	if !ok || len(valueEmail[0]) < 1 {
+		UsersController.BadRequestResponse(c)
+		return
+	}
+	newEmail := string(valueEmail[0])
+
+	valueName, ok := c.Request.URL.Query()["name"]
+	if !ok || len(valueName[0]) < 1 {
+		// UsersController.BadRequestResponse(c)
+		return
+	}
+	newName := string(valueName[0])
+
+	valueDescription, ok := c.Request.URL.Query()["description"]
+	if !ok || len(valueDescription[0]) < 1 {
+		UsersController.BadRequestResponse(c)
+		return
+	}
+	newDescription := string(valueDescription[0])
+
+	c.Header("Content-Type", "application/json")
+
+	users := services.UsersService.GetByEmail(newEmail)
+
+	statusCode := http.StatusOK
+
+	if len(users) >= 1 {
+
 		UsersController.BadRequestResponse(c)
 		return
 	}
 
-	c.Header("Content-Type", "application/json")
-
-	newEmail := string(value[0])
-
-	users := services.UsersService.GetByEmail(newEmail)
-	
-	userResponse := &domain.User{}
-	statusCode := http.StatusOK
-
-	if len(users) < 1 {
-		newUser := &domain.User{
-			ID:        primitive.NewObjectID(),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Email:     newEmail,
-		}
-
-		services.UsersService.Save(newUser)
-
-		userResponse = newUser
-	} else {
-
-		userResponse = users[len(users)-1]
-		statusCode = http.StatusBadRequest
+	newUser := &domain.User{
+		ID:          primitive.NewObjectID(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Email:       newEmail,
+		Name:        newName,
+		Description: newDescription,
 	}
 
-	c.JSON(statusCode, gin.H{
+	services.UsersService.Save(newUser)
+
+	c.JSON(http.StatusOK, gin.H{
 		"code":    statusCode,
-		"message": userResponse,
+		"message": newUser,
 	})
 }
